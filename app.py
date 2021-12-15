@@ -1,4 +1,7 @@
-# Seu código aqui
+from flask import Flask, jsonify, request
+
+app = Flask(__name__)
+
 produtos = [
     {"id": 1, "name": "sabonete", "price": 5.99},
     {"id": 2, "name": "perfume", "price": 39.90},
@@ -31,3 +34,40 @@ produtos = [
     {"id": 29, "name": "coberta", "price": 55.99},
     {"id": 30, "name": "sofa", "price": 600.15}
 ]
+
+def find_index(int):
+	index = 0
+	for item in produtos:
+		if item["id"] != int:
+			index += 1
+		else:
+			return index
+
+@app.get("/products")
+def list_products():
+    products = jsonify(produtos), 200
+    return products
+
+
+@app.get("/products/<int:product_id>")
+def get(product_id: int):
+    product = jsonify(produtos[find_index(product_id)]), 200
+    return product
+
+@app.post("/products")
+def create():
+	product = request.get_json()
+	data = {"id": len(produtos) + 1, **product} 
+	produtos.append(data)
+	return jsonify(data), 201
+
+@app.patch("/products/<int:product_id>")
+def update(product_id: int):
+	upd_product = request.get_json()
+	produtos[find_index(product_id)]  = {"id": product_id, **upd_product}
+	return "", 204
+
+@app.delete("/products/<int:product_id>")
+def delete(product_id: int):
+	del produtos[find_index(product_id)]
+	return "", 204
